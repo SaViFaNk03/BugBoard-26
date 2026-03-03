@@ -22,6 +22,7 @@ public class IssueService {
 
     private final IssueRepository issueRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // RF - 2: Creazione Issue
     public IssueDTO createIssue(IssueDTO issueDTO) {
@@ -107,16 +108,22 @@ public class IssueService {
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Assignee non trovato con ID: " + issueDTO.getAssigneeId()));
             issue.setAssignee(assignee);
-            System.out.println("NOTIFICA A " + assignee.getEmail()
-                    + ": Ti è stata assegnata una nuova issue: '" + issue.getTitle() + "'");
+
+            // Notifica a chi è stata assegnata l'issue
+            notificationService.createNotification(
+                    assignee,
+                    "Ti è stata assegnata una nuova issue : \"" + issue.getTitle() + "\"",
+                    issue.getId());
         } else {
             issue.setAssignee(null);
         }
 
-        // Simulazione Notifica (RF-6): si attiva SOLO quando lo stato TRANSITA a DONE
+        // Notifica al reporter quando l'issue viene chiusa
         if (issueDTO.getStatus() == Status.DONE && !wasAlreadyDone && issue.getReporter() != null) {
-            System.out.println("NOTIFICA A " + issue.getReporter().getEmail()
-                    + ": Il tuo bug '" + issue.getTitle() + "' è stato risolto!");
+            notificationService.createNotification(
+                    issue.getReporter(),
+                    "La tua issue : \"" + issue.getTitle() + "\" è stata risolta e chiusa",
+                    issue.getId());
         }
 
         return toDTO(issueRepository.save(issue));
