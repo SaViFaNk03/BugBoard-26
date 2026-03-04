@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bugboard_postgres
+    environment:
+      POSTGRES_DB: bugboard_db
+      POSTGRES_USER: bugboard_user
+      POSTGRES_PASSWORD: bugboard_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: bugboard_backend
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/bugboard_db
+      DB_USER: bugboard_user
+      DB_PASS: bugboard_pass
+    depends_on:
+      - postgres
+    volumes:
+      - backend_uploads:/app/uploads
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: bugboard_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  backend_uploads:
