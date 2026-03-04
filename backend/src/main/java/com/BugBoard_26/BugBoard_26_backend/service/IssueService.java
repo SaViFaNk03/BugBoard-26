@@ -2,6 +2,7 @@ package com.BugBoard_26.BugBoard_26_backend.service;
 
 import com.BugBoard_26.BugBoard_26_backend.dto.IssueDTO;
 import com.BugBoard_26.BugBoard_26_backend.model.Issue;
+import com.BugBoard_26.BugBoard_26_backend.model.Role;
 import com.BugBoard_26.BugBoard_26_backend.model.Status;
 import com.BugBoard_26.BugBoard_26_backend.model.User;
 import com.BugBoard_26.BugBoard_26_backend.model.Priority;
@@ -50,7 +51,18 @@ public class IssueService {
             issue.setAssignee(assignee);
         }
 
-        return toDTO(issueRepository.save(issue));
+        Issue savedIssue = issueRepository.save(issue);
+
+        // RF - 5: Notifica a tutti gli ADMIN per ogni nuova segnalazione
+        String reporterName = (savedIssue.getReporter() != null)
+                ? savedIssue.getReporter().getName() + " " + savedIssue.getReporter().getSurname()
+                : "un utente";
+        String adminMsg = "Nuova segnalazione da " + reporterName + ": \"" + savedIssue.getTitle() + "\"";
+
+        userRepository.findByRole(Role.ADMIN)
+                .forEach(admin -> notificationService.createNotification(admin, adminMsg, savedIssue.getId()));
+
+        return toDTO(savedIssue);
     }
 
     // RF - 3: Visualizzazione Issue
@@ -103,17 +115,22 @@ public class IssueService {
         issue.setType(issueDTO.getType());
 
         // Assegnazione Utente (RF-4)
+        Long previousAssigneeId = (issue.getAssignee() != null) ? issue.getAssignee().getId() : null;
+
         if (issueDTO.getAssigneeId() != null) {
             User assignee = userRepository.findById(issueDTO.getAssigneeId())
                     .orElseThrow(() -> new EntityNotFoundException(
                             "Assignee non trovato con ID: " + issueDTO.getAssigneeId()));
             issue.setAssignee(assignee);
 
-            // Notifica a chi è stata assegnata l'issue
-            notificationService.createNotification(
-                    assignee,
-                    "Ti è stata assegnata una nuova issue : \"" + issue.getTitle() + "\"",
-                    issue.getId());
+            // Notifica SOLO se l'assegnatario è cambiato (non ad ogni salvataggio)
+            boolean assigneeChanged = !issueDTO.getAssigneeId().equals(previousAssigneeId);
+            if (assigneeChanged) {
+                notificationService.createNotification(
+                        assignee,
+                        "Ti è stata assegnata una nuova issue : \"" + issue.getTitle() + "\"",
+                        issue.getId());
+            }
         } else {
             issue.setAssignee(null);
         }

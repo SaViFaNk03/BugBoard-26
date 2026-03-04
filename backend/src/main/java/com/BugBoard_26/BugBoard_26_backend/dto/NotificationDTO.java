@@ -8,7 +8,7 @@ public class NotificationDTO {
     private Long id;
     private Long userId;
     private String message;
-    private boolean isRead;
+    private boolean read;
     private LocalDateTime createdAt;
     private Long issueId;
 }
