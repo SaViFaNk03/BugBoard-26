@@ -5,7 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,10 +25,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
@@ -53,8 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        userDetails.getAuthorities()
-                );
+                        userDetails.getAuthorities());
 
                 // Aggiunge dettagli della richiesta (IP, session ID, etc.)
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -62,10 +60,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 6. REGISTRA L'UTENTE COME AUTENTICATO PER QUESTA RICHIESTA
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             } else {
-                 System.out.println("Token is INVALID!");
+                System.out.println("Token is INVALID!");
             }
         } else {
-             System.out.println("UserEmail null or Context already set. Email: " + userEmail);
+            System.out.println("UserEmail null or Context already set. Email: " + userEmail);
         }
 
         // Passa la palla al prossimo filtro della catena
