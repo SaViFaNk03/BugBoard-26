@@ -1,0 +1,71 @@
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #3e3e3e;
+}
+
+.board-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.header-logo {
+    height: 80px;
+    width: auto;
+    display: block;
+    border-radius: 4px;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-user-management,
+.btn-create {
+    background-color: #7566f0;
+    color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-user-management:hover,
+.btn-create:hover {
+    opacity: 0.9;
+}
+
+.btn-logout {
+    background: transparent;
+    color: #9da3a8;
+    border: 1px solid #3e3e3e;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-logout:hover {
+    background-color: #262626;
+    color: #ffffff;
+}
