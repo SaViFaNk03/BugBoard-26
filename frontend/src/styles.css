@@ -15,8 +15,9 @@ body {
 .board-header {
     background: transparent !important;
     border-bottom: 1px solid #3e3e3e;
-    padding: 1rem 0;
-    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    margin: 0 auto 2rem;
+    max-width: 1200px;
 }
 
 /* 2. FILTRI ORIZZONTALI (Il problema principale delle foto) */
@@ -88,4 +89,81 @@ body {
     font-size: 0.75rem;
     letter-spacing: 0.05em;
     padding: 12px;
+}
+
+/* 5. SPINNER & LOADING STATE */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    background: #1c1c1c;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.loading-state p {
+    color: #8b8d91;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(117, 102, 240, 0.2);
+    border-radius: 50%;
+    border-top-color: #7566f0;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 6. RESPONSIVE DESIGN */
+@media screen and (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .filters-bar select,
+    .filters-bar input[type="text"] {
+        width: 100% !important;
+        min-width: 100%;
+    }
+
+    .btn-reset {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .checkbox-label {
+        margin-top: 0.5rem;
+    }
+
+    .board-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .board-header .actions {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .loading-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
 }
