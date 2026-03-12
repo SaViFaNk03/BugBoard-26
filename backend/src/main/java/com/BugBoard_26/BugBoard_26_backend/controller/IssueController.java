@@ -1,6 +1,7 @@
 package com.BugBoard_26.BugBoard_26_backend.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,18 +42,19 @@ public class IssueController {
         return ResponseEntity.ok(issueService.getIssueById(id));
     }
 
-    // RF - 3: Ottenimento lista issue con filtri opzionali + ordinamento
-    // GET
-    // /api/issues?status=TODO&priority=HIGH&type=BUG&sortBy=dateAdded&sortDir=desc
+    // RF - 3: Ottenimento lista issue con filtri opzionali + ordinamento +
+    // paginazione
+    // GET /api/issues?status=TODO&priority=HIGH&page=0&size=10
     @GetMapping
-    public ResponseEntity<List<IssueDTO>> getAllIssues(
+    public ResponseEntity<Map<String, Object>> getAllIssues(
             @RequestParam(required = false) Status status,
             @RequestParam(required = false) Priority priority,
             @RequestParam(required = false) IssueType type,
             @RequestParam(required = false, defaultValue = "dateAdded") String sortBy,
-            @RequestParam(required = false, defaultValue = "desc") String sortDir) {
-        List<IssueDTO> issues = issueService.getIssuesFiltered(status, priority, type, sortBy, sortDir);
-        return ResponseEntity.ok(issues);
+            @RequestParam(required = false, defaultValue = "desc") String sortDir,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(issueService.getIssuesFiltered(status, priority, type, sortBy, sortDir, page, size));
     }
 
     // RF - 2: Creazione issue

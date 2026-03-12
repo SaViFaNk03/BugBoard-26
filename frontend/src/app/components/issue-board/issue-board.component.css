@@ -320,3 +320,39 @@
 .btn-action.delete {
     color: #f85149;
 }
+
+/* Paginazione */
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.25rem;
+}
+
+.btn-page {
+    background-color: #262626;
+    color: #dcddde;
+    border: 1px solid #3e3e3e;
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-page:hover:not(:disabled) {
+    background-color: #7566f0;
+    border-color: #7566f0;
+    color: #fff;
+}
+
+.btn-page:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.page-info {
+    font-size: 0.85rem;
+    color: #9da3a8;
+}

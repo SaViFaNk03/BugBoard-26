@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { IssueService } from '../../services/issue.service';
+import { IssueService, PagedResponse } from '../../services/issue.service';
 import { Issue, Status, Priority } from '../../models/issue.model';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
 import { ConfirmModal } from '../confirm-modal/confirm-modal';
@@ -20,6 +20,11 @@ export class IssueBoardComponent implements OnInit {
   isAdmin: boolean = localStorage.getItem('role') === 'ADMIN';
   currentUserId: number = Number(localStorage.getItem('userID'));
   isLoading: boolean = true;
+
+  // Paginazione
+  currentPage: number = 0;
+  totalPages: number = 0;
+  pageSize: number = 10;
 
   constructor(
     private issueService: IssueService,
@@ -50,9 +55,12 @@ export class IssueBoardComponent implements OnInit {
 
   loadIssues(): void {
     this.isLoading = true;
-    this.issueService.getAllIssues().subscribe({
-      next: (data) => {
-        this.issues = data;
+    this.issueService.getAllIssues(this.currentPage, this.pageSize).subscribe({
+      next: (data: PagedResponse) => {
+        this.issues = this.filterMine
+          ? data.content.filter((i: Issue) => i.assigneeId === Number(localStorage.getItem('userID')))
+          : data.content;
+        this.totalPages = data.totalPages;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -99,6 +107,11 @@ export class IssueBoardComponent implements OnInit {
     this.promptDeleteIssue(id);
   }
   applyFilters(): void {
+    this.currentPage = 0; // reset alla prima pagina quando cambiano i filtri
+    this.fetchFiltered();
+  }
+
+  fetchFiltered(): void {
     this.isLoading = true;
     const params: any = {};
     if (this.filterStatus) params['status'] = this.filterStatus;
@@ -106,11 +119,12 @@ export class IssueBoardComponent implements OnInit {
     if (this.filterType) params['type'] = this.filterType;
     params['sortBy'] = this.sortBy;
     params['sortDir'] = this.sortDir;
-    this.issueService.getIssuesFiltered(params).subscribe({
-      next: (data) => {
+    this.issueService.getIssuesFiltered(params, this.currentPage, this.pageSize).subscribe({
+      next: (data: PagedResponse) => {
         this.issues = this.filterMine
-          ? data.filter(i => i.assigneeId === Number(localStorage.getItem('userID')))
-          : data;
+          ? data.content.filter((i: Issue) => i.assigneeId === Number(localStorage.getItem('userID')))
+          : data.content;
+        this.totalPages = data.totalPages;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -121,6 +135,13 @@ export class IssueBoardComponent implements OnInit {
       }
     });
   }
+
+  goToPage(page: number): void {
+    if (page < 0 || page >= this.totalPages) return;
+    this.currentPage = page;
+    const hasFilters = this.filterStatus || this.filterPriority || this.filterType;
+    hasFilters ? this.fetchFiltered() : this.loadIssues();
+  }
   resetFilters(statusEl: HTMLSelectElement, priorityEl: HTMLSelectElement, typeEl: HTMLSelectElement,
     sortByEl: HTMLSelectElement, sortDirEl: HTMLSelectElement): void {
     this.filterStatus = '';
@@ -128,6 +149,7 @@ export class IssueBoardComponent implements OnInit {
     this.filterType = '';
     this.sortBy = 'dateAdded';
     this.sortDir = 'desc';
+    this.currentPage = 0;
     statusEl.value = '';
     priorityEl.value = '';
     typeEl.value = '';

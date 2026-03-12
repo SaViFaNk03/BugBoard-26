@@ -10,12 +10,15 @@ import com.BugBoard_26.BugBoard_26_backend.model.IssueType;
 import com.BugBoard_26.BugBoard_26_backend.repository.IssueRepository;
 import com.BugBoard_26.BugBoard_26_backend.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -78,16 +81,20 @@ public class IssueService {
     }
 
     @Transactional(readOnly = true)
-    public List<IssueDTO> getIssuesFiltered(Status status, Priority priority, IssueType type,
-            String sortBy, String sortDir) {
-        // Campi ordinabili ammessi (whitelist per sicurezza)
+    public Map<String, Object> getIssuesFiltered(Status status, Priority priority, IssueType type,
+            String sortBy, String sortDir, int page, int size) {
         java.util.Set<String> allowed = java.util.Set.of("dateAdded", "deadline", "priority", "status", "title");
         String field = allowed.contains(sortBy) ? sortBy : "dateAdded";
         Sort sort = "asc".equalsIgnoreCase(sortDir)
                 ? Sort.by(field).ascending()
                 : Sort.by(field).descending();
-        return issueRepository.findByFilters(status, priority, type, sort)
-                .stream().map(this::toDTO).toList();
+        PageRequest pageable = PageRequest.of(page, size, sort);
+        Page<Issue> pageResult = issueRepository.findByFilters(status, priority, type, pageable);
+        return Map.of(
+                "content", pageResult.getContent().stream().map(this::toDTO).toList(),
+                "totalPages", pageResult.getTotalPages(),
+                "totalElements", pageResult.getTotalElements(),
+                "currentPage", pageResult.getNumber());
     }
 
     // RF - 11: Ricerca Issue
