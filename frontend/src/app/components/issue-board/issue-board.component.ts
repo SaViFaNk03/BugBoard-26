@@ -18,6 +18,7 @@ export class IssueBoardComponent implements OnInit {
   issues: Issue[] = [];
   status = Status;
   isAdmin: boolean = localStorage.getItem('role') === 'ADMIN';
+  currentUserId: number = Number(localStorage.getItem('userID'));
   isLoading: boolean = true;
 
   constructor(
@@ -170,5 +171,8 @@ export class IssueBoardComponent implements OnInit {
         this.toastService.show('Errore durante la ricerca', 'error');
       }
     })
+  }
+  canEdit(issue: Issue): boolean {
+    return this.isAdmin || issue.assigneeId === this.currentUserId;
   }
 }
