@@ -145,6 +145,16 @@
 
 </div>
 
+<div class="pagination-bar" *ngIf="!isLoading && totalPages > 1">
+    <button class="btn-page" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+        &larr; Precedente
+    </button>
+    <span class="page-info">Pagina {{ currentPage + 1 }} di {{ totalPages }}</span>
+    <button class="btn-page" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+        Successiva &rarr;
+    </button>
+</div>
+
 <app-confirm-modal *ngIf="showConfirmDelete" title="Elimina Issue"
     message="Sei sicuro di voler eliminare visualmente questo ticket? Questa operazione è irreversibile."
     confirmText="Sì, elimina" cancelText="Annulla" (confirm)="confirmDelete()" (cancel)="cancelDelete()">

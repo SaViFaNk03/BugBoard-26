@@ -2,6 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Issue } from '../models/issue.model';
+
+export interface PagedResponse {
+    content: Issue[];
+    totalPages: number;
+    totalElements: number;
+    currentPage: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -9,17 +17,18 @@ export class IssueService {
     private apiUrl = 'http://localhost:8080/api/issues';
     constructor(private http: HttpClient) { }
     // GET /api/issues
-    getAllIssues(): Observable<Issue[]> {
-        return this.http.get<Issue[]>(this.apiUrl);
+    getAllIssues(page: number = 0, size: number = 10): Observable<PagedResponse> {
+        const params = new HttpParams().set('page', page).set('size', size);
+        return this.http.get<PagedResponse>(this.apiUrl, { params });
     }
-    getIssuesFiltered(filters: any): Observable<Issue[]> {
-        let params = new HttpParams();
+    getIssuesFiltered(filters: any, page: number = 0, size: number = 10): Observable<PagedResponse> {
+        let params = new HttpParams().set('page', page).set('size', size);
         if (filters.status) params = params.set('status', filters.status);
         if (filters.priority) params = params.set('priority', filters.priority);
         if (filters.type) params = params.set('type', filters.type);
         if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
         if (filters.sortDir) params = params.set('sortDir', filters.sortDir);
-        return this.http.get<Issue[]>(this.apiUrl, { params });
+        return this.http.get<PagedResponse>(this.apiUrl, { params });
     }
     // GET /api/issues/{id}
     getIssueById(id: number): Observable<Issue> {
