@@ -10,7 +10,7 @@ import { ToastService } from '../../services/toast.service';
 @Component({
   selector: 'app-issue-board',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationBellComponent, ConfirmModal],
+  imports: [CommonModule, RouterModule, ConfirmModal],
   templateUrl: './issue-board.component.html',
   styleUrls: ['./issue-board.component.css']
 })
@@ -25,6 +25,10 @@ export class IssueBoardComponent implements OnInit {
   currentPage: number = 0;
   totalPages: number = 0;
   pageSize: number = 10;
+
+  // Cache di pagina: evita richieste HTTP ridondanti per pagine già visitate
+  // Chiave: "status|priority|type|sortBy|sortDir:page"
+  private pageCache = new Map<string, { issues: Issue[], totalPages: number }>();
 
   constructor(
     private issueService: IssueService,
@@ -54,9 +58,21 @@ export class IssueBoardComponent implements OnInit {
   }
 
   loadIssues(): void {
+    const key = this.buildCacheKey(this.currentPage);
+    const cached = this.pageCache.get(key);
+    if (cached) {
+      this.issues = this.filterMine
+        ? cached.issues.filter((i: Issue) => i.assigneeId === Number(localStorage.getItem('userID')))
+        : cached.issues;
+      this.totalPages = cached.totalPages;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.isLoading = true;
     this.issueService.getAllIssues(this.currentPage, this.pageSize).subscribe({
       next: (data: PagedResponse) => {
+        this.pageCache.set(key, { issues: data.content, totalPages: data.totalPages });
         this.issues = this.filterMine
           ? data.content.filter((i: Issue) => i.assigneeId === Number(localStorage.getItem('userID')))
           : data.content;
@@ -70,6 +86,10 @@ export class IssueBoardComponent implements OnInit {
         this.toastService.show('Errore nel caricamento dei ticket', 'error');
       }
     });
+  }
+
+  private buildCacheKey(page: number): string {
+    return `${this.filterStatus}|${this.filterPriority}|${this.filterType}|${this.sortBy}|${this.sortDir}:${page}`;
   }
 
   showConfirmDelete: boolean = false;
@@ -87,6 +107,8 @@ export class IssueBoardComponent implements OnInit {
       next: () => {
         this.showConfirmDelete = false;
         this.issueToDelete = null;
+        // Invalida tutta la cache: dopo una cancellazione i dati sono cambiati
+        this.pageCache.clear();
         this.toastService.show('Ticket eliminato con successo', 'success');
         this.loadIssues();
       },
@@ -112,6 +134,17 @@ export class IssueBoardComponent implements OnInit {
   }
 
   fetchFiltered(): void {
+    const key = this.buildCacheKey(this.currentPage);
+    const cached = this.pageCache.get(key);
+    if (cached) {
+      this.issues = this.filterMine
+        ? cached.issues.filter((i: Issue) => i.assigneeId === Number(localStorage.getItem('userID')))
+        : cached.issues;
+      this.totalPages = cached.totalPages;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.isLoading = true;
     const params: any = {};
     if (this.filterStatus) params['status'] = this.filterStatus;
@@ -121,6 +154,7 @@ export class IssueBoardComponent implements OnInit {
     params['sortDir'] = this.sortDir;
     this.issueService.getIssuesFiltered(params, this.currentPage, this.pageSize).subscribe({
       next: (data: PagedResponse) => {
+        this.pageCache.set(key, { issues: data.content, totalPages: data.totalPages });
         this.issues = this.filterMine
           ? data.content.filter((i: Issue) => i.assigneeId === Number(localStorage.getItem('userID')))
           : data.content;
@@ -150,6 +184,8 @@ export class IssueBoardComponent implements OnInit {
     this.sortBy = 'dateAdded';
     this.sortDir = 'desc';
     this.currentPage = 0;
+    // Invalida la cache quando si resettano i filtri
+    this.pageCache.clear();
     statusEl.value = '';
     priorityEl.value = '';
     typeEl.value = '';

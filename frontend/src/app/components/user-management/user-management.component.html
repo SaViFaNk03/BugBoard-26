@@ -60,22 +60,40 @@
         <h2>{{ isEditMode ? 'Modifica Utente' : 'Nuovo Utente' }}</h2>
         <button class="close-btn" (click)="closeForm()">×</button>
       </div>
-      <form (ngSubmit)="saveUser()">
+      <form (ngSubmit)="saveUser()" #form="ngForm">
         <div class="form-group">
           <label>Nome:</label>
-          <input type="text" [(ngModel)]="userForm.name" name="name" required>
+          <input type="text" [(ngModel)]="userForm.name" name="name" required minlength="2" #nameField="ngModel">
+          <span class="field-error" *ngIf="nameField.invalid && nameField.touched">
+            <span *ngIf="nameField.errors?.['required']">Il nome è obbligatorio.</span>
+            <span *ngIf="nameField.errors?.['minlength']">Il nome deve avere almeno 2 caratteri.</span>
+          </span>
         </div>
         <div class="form-group">
           <label>Cognome:</label>
-          <input type="text" [(ngModel)]="userForm.surname" name="surname" required>
+          <input type="text" [(ngModel)]="userForm.surname" name="surname" required minlength="2"
+            #surnameField="ngModel">
+          <span class="field-error" *ngIf="surnameField.invalid && surnameField.touched">
+            <span *ngIf="surnameField.errors?.['required']">Il cognome è obbligatorio.</span>
+            <span *ngIf="surnameField.errors?.['minlength']">Il cognome deve avere almeno 2 caratteri.</span>
+          </span>
         </div>
         <div class="form-group">
           <label>Email:</label>
-          <input type="email" [(ngModel)]="userForm.email" name="email" required>
+          <input type="email" [(ngModel)]="userForm.email" name="email" required email #emailField="ngModel">
+          <span class="field-error" *ngIf="emailField.invalid && emailField.touched">
+            <span *ngIf="emailField.errors?.['required']">L'email è obbligatoria.</span>
+            <span *ngIf="emailField.errors?.['email']">Inserisci un indirizzo email valido.</span>
+          </span>
         </div>
         <div class="form-group">
           <label>Password{{ isEditMode ? ' (lascia vuoto per non modificare)' : '' }}:</label>
-          <input type="password" [(ngModel)]="userForm.password" name="password" [required]="!isEditMode">
+          <input type="password" [(ngModel)]="userForm.password" name="password" [required]="!isEditMode" minlength="6"
+            #passwordField="ngModel">
+          <span class="field-error" *ngIf="passwordField.invalid && passwordField.touched">
+            <span *ngIf="passwordField.errors?.['required']">La password è obbligatoria.</span>
+            <span *ngIf="passwordField.errors?.['minlength']">La password deve contenere almeno 6 caratteri.</span>
+          </span>
         </div>
         <div class="form-group">
           <label>Ruolo:</label>
@@ -86,7 +104,7 @@
         </div>
         <div class="form-actions">
           <button type="button" class="btn-cancel" (click)="closeForm()">Annulla</button>
-          <button type="submit" class="btn-save">Salva</button>
+          <button type="submit" class="btn-save" [disabled]="form.invalid">Salva</button>
         </div>
       </form>
     </div>

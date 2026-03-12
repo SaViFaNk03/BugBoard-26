@@ -225,4 +225,22 @@
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
+  transition: opacity 0.1s ease;
+}
+
+.btn-save:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-save:disabled {
+  background: #3e3e3e;
+  color: #727272;
+  cursor: not-allowed;
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  color: #f85149;
 }

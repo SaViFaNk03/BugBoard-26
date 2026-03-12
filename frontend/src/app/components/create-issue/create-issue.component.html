@@ -5,14 +5,23 @@
 
         <div class="form-group">
             <label>Titolo del problema</label>
-            <input type="text" [(ngModel)]="issue.title" name="title" required
-                placeholder="Es. Errore nel login o Schermata bianca">
+            <input type="text" [(ngModel)]="issue.title" name="title" required minlength="5"
+                placeholder="Es. Errore nel login o Schermata bianca" #titleField="ngModel">
+            <span class="field-error" *ngIf="titleField.invalid && titleField.touched">
+                <span *ngIf="titleField.errors?.['required']">Il titolo è obbligatorio.</span>
+                <span *ngIf="titleField.errors?.['minlength']">Il titolo deve contenere almeno 5 caratteri.</span>
+            </span>
         </div>
 
         <div class="form-group">
             <label>Descrizione dettagliata</label>
-            <textarea [(ngModel)]="issue.description" name="description" rows="5" required
-                placeholder="Fornisci quanti più dettagli possibili per aiutarci a riprodurre il problema..."></textarea>
+            <textarea [(ngModel)]="issue.description" name="description" rows="5" required minlength="10"
+                placeholder="Fornisci quanti più dettagli possibili per aiutarci a riprodurre il problema..."
+                #descField="ngModel"></textarea>
+            <span class="field-error" *ngIf="descField.invalid && descField.touched">
+                <span *ngIf="descField.errors?.['required']">La descrizione è obbligatoria.</span>
+                <span *ngIf="descField.errors?.['minlength']">La descrizione deve contenere almeno 10 caratteri.</span>
+            </span>
         </div>
 
         <div class="form-group">
