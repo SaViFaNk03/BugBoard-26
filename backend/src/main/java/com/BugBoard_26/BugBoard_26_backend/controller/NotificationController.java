@@ -48,4 +48,20 @@ public class NotificationController {
         notificationService.markAllAsRead(currentUser.getId());
         return ResponseEntity.noContent().build();
     }
+
+    // DELETE /api/notifications/me/all — elimina tutte le notifiche dell'utente
+    // loggato
+    @DeleteMapping("/me/all")
+    public ResponseEntity<Void> deleteAllMyNotifications(Authentication authentication) {
+        User currentUser = (User) authentication.getPrincipal();
+        notificationService.deleteAllForUser(currentUser.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    // DELETE /api/notifications/{id} — elimina una notifica
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+        return ResponseEntity.noContent().build();
+    }
 }

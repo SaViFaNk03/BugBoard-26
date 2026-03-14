@@ -49,12 +49,25 @@ public class NotificationService {
         });
     }
 
+    // Elimina tutte le notifiche di un utente
+    @Transactional
+    public void deleteAllForUser(Long userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        notificationRepository.deleteAll(notifications);
+    }
+
     // Segna tutte le notifiche di un utente come lette
     @Transactional
     public void markAllAsRead(Long userId) {
         List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
         notifications.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(notifications);
+    }
+
+    // Elimina una notifica
+    @Transactional
+    public void deleteNotification(Long notificationId) {
+        notificationRepository.deleteById(notificationId);
     }
 
     private NotificationDTO toDTO(Notification n) {
