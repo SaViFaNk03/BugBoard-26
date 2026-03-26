@@ -99,9 +99,28 @@ h3 {
 .meta-badges {
     display: flex;
     gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.meta-info-header {
+    display: flex;
+    gap: 1.5rem;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #3e3e3e;
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.meta-info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.meta-info-item strong {
+    color: #f3f4f6;
+    font-weight: 500;
 }
 
 .badge,
@@ -193,8 +212,7 @@ h3 {
 }
 
 /* Edit Form */
-.form-group select,
-.form-group input {
+.form-control {
     width: 100%;
     padding: 0.6rem;
     background: #262626;
@@ -202,6 +220,13 @@ h3 {
     color: #ffffff;
     border-radius: 4px;
     font-size: 0.9rem;
+    transition: border-color 0.2s;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+.form-control:focus {
+    border-color: #7566f0;
 }
 
 .success-text {

@@ -33,6 +33,22 @@
             <span class="type-badge">{{ issue.type }}</span>
         </div>
 
+        <div class="meta-info-header">
+            <div class="meta-info-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Segnalato da: <strong *ngIf="issue.reporterId">{{ issue.reporterFullName }}</strong><strong *ngIf="!issue.reporterId" style="font-style: italic;">Anonimo</strong></span>
+            </div>
+            <div class="meta-info-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Creato il: <strong>{{ issue.dateAdded | date:'medium' }}</strong></span>
+            </div>
+        </div>
+
         <div class="issue-body">
 
             <div class="main-info">
@@ -48,96 +64,89 @@
             </div>
 
             <div class="sidebar-wrapper">
+                <div class="card-panel">
+                    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid #3e3e3e; padding-bottom: 0.5rem;">Dettagli Issue</h3>
+                    
+                    <div class="info-group">
+                        <label>Stato</label>
+                        <div [hidden]="!(isAdmin || issue.assigneeId === currentUserId)">
+                            <select #statusEditRef class="form-control" [value]="issue.status">
+                                <option value="TODO">TODO</option>
+                                <option value="IN_PROGRESS">IN PROGRESS</option>
+                                <option value="DONE">DONE</option>
+                                <option value="DUPLICATE">DUPLICATE</option>
+                            </select>
+                        </div>
+                        <div [hidden]="isAdmin || issue.assigneeId === currentUserId">
+                            <span class="badge" [ngClass]="getStatusClass(issue.status)">{{ issue.status }}</span>
+                        </div>
+                    </div>
 
-                <div class="side-info card-panel">
                     <div class="info-group">
                         <label>Assegnato a</label>
-                        <span *ngIf="issue.assigneeId" class="assignee-wrapper">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                            {{ issue.assigneeFullName }}
-                        </span>
-                        <span *ngIf="!issue.assigneeId" style="color: #9ca3af; font-style: italic;">Non assegnato</span>
+                        <div [hidden]="!isAdmin">
+                            <select #assigneeRef class="form-control">
+                                <option value="">Nessuno</option>
+                                <option *ngFor="let u of usersList" [value]="u.id" [selected]="issue.assigneeId === u.id">
+                                    {{ u.name }} {{ u.surname }}
+                                </option>
+                            </select>
+                        </div>
+                        <div [hidden]="isAdmin">
+                            <span *ngIf="issue.assigneeId">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                {{ issue.assigneeFullName }}
+                            </span>
+                            <span *ngIf="!issue.assigneeId" style="color: #9ca3af; font-style: italic;">Non assegnato</span>
+                        </div>
                     </div>
-                    <div class="info-group">
-                        <label>Segnalato da</label>
-                        <span *ngIf="issue.reporterId">{{ issue.reporterFullName }}</span>
-                        <span *ngIf="!issue.reporterId" style="color: #9ca3af; font-style: italic;">Anonimo</span>
-                    </div>
+
                     <div class="info-group">
                         <label>Scadenza</label>
-                        <span [class.overdue]="false">
-                            {{ issue.deadline ? (issue.deadline | date:'medium') : 'Nessuna scadenza' }}
-                        </span>
-                    </div>
-                    <div class="info-group">
-                        <label>Creato il</label>
-                        <span>{{ issue.dateAdded | date:'medium' }}</span>
-                    </div>
-                </div>
-
-                <div class="edit-section card-panel" *ngIf="isAdmin || issue.assigneeId === currentUserId">
-                    <h3>Gestione Issue</h3>
-
-                    <div class="form-group">
-                        <label>Aggiorna Stato</label>
-                        <select #statusEditRef>
-                            <option value="TODO" [selected]="issue.status === 'TODO'">TODO</option>
-                            <option value="IN_PROGRESS" [selected]="issue.status === 'IN_PROGRESS'">IN PROGRESS</option>
-                            <option value="DONE" [selected]="issue.status === 'DONE'">DONE</option>
-                            <option value="DUPLICATE" [selected]="issue.status === 'DUPLICATE'">DUPLICATE</option>
-                        </select>
+                        <div [hidden]="!isAdmin">
+                            <input type="datetime-local" #deadlineRef class="form-control"
+                                [value]="issue.deadline ? (issue.deadline | date:'yyyy-MM-ddTHH:mm') : ''" />
+                        </div>
+                        <div [hidden]="isAdmin">
+                            <span [class.overdue]="false">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                {{ issue.deadline ? (issue.deadline | date:'medium') : 'Nessuna scadenza' }}
+                            </span>
+                        </div>
                     </div>
 
-                    <div class="form-group" [hidden]="!isAdmin">
-                        <label>Assegna a</label>
-                        <select #assigneeRef>
-                            <option value="">Nessuno</option>
-                            <option *ngFor="let u of usersList" [value]="u.id" [selected]="issue.assigneeId === u.id">
-                                {{ u.name }} {{ u.surname }}
-                            </option>
-                        </select>
-                    </div>
+                    <div style="margin-top: 1.5rem; border-top: 1px solid #3e3e3e; padding-top: 1.5rem;" *ngIf="isAdmin || issue.assigneeId === currentUserId">
+                        <ng-container *ngIf="isAdmin; else devSave">
+                            <button class="btn-save"
+                                (click)="saveChanges(statusEditRef.value, assigneeRef.value, deadlineRef.value)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                    <path d="M20 6L9 17l-5-5"></path>
+                                </svg>
+                                Salva Modifiche
+                            </button>
+                        </ng-container>
+                        <ng-template #devSave>
+                            <button class="btn-save" (click)="saveChanges(statusEditRef.value, '', '')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                                    <path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                                </svg>
+                                Aggiorna Stato
+                            </button>
+                        </ng-template>
 
-                    <div class="form-group" [hidden]="!isAdmin">
-                        <label>Scadenza</label>
-                        <input type="datetime-local" #deadlineRef
-                            [value]="issue.deadline ? (issue.deadline | date:'yyyy-MM-ddTHH:mm') : ''" />
-                    </div>
-
-                    <ng-container *ngIf="isAdmin; else devSave">
-                        <button class="btn-save"
-                            (click)="saveChanges(statusEditRef.value, assigneeRef.value, deadlineRef.value)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 6L9 17l-5-5"></path>
+                        <div *ngIf="saveSuccess" class="success-text">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin-right: 4px; vertical-align: middle;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
-                            Salva Modifiche
-                        </button>
-                    </ng-container>
-                    <ng-template #devSave>
-                        <button class="btn-save" (click)="saveChanges(statusEditRef.value, '', '')">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 2v6h-6"></path>
-                                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                                <path d="M3 22v-6h6"></path>
-                                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
-                            </svg>
-                            Aggiorna Stato
-                        </button>
-                    </ng-template>
-
-                    <div *ngIf="saveSuccess" class="success-text">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
-                        Salvato con successo!
+                            Salvato con successo!
+                        </div>
                     </div>
+
                 </div>
             </div>
 
