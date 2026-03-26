@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { NotificationService } from '../../services/notification.service';
+import { API_BASE_URL } from '../../app.constants';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -30,7 +32,7 @@ export class LoginComponent {
     this.errorMessage = '';
 
     // Nota: L'URL dovrebbe essere in un environment file, ma per ora va bene così
-    this.http.post<any>('http://localhost:8080/api/auth/login', this.loginData)
+    this.http.post<any>(`${API_BASE_URL}/auth/login`, this.loginData)
       .subscribe({
         next: (response) => {
           // Salviamo il token (lo useremo dopo per le chiamate autenticate)

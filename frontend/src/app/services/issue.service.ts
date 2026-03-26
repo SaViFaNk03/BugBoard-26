@@ -10,11 +10,13 @@ export interface PagedResponse {
     currentPage: number;
 }
 
+import { API_BASE_URL } from '../app.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class IssueService {
-    private apiUrl = 'http://localhost:8080/api/issues';
+    private apiUrl = `${API_BASE_URL}/issues`;
     constructor(private http: HttpClient) { }
     // GET /api/issues
     getAllIssues(page: number = 0, size: number = 10): Observable<PagedResponse> {
@@ -42,7 +44,7 @@ export class IssueService {
     uploadImage(file: File): Observable<{ imageUrl: string }> {
         const formData: FormData = new FormData();
         formData.append('file', file, file.name);
-        return this.http.post<{ imageUrl: string }>('http://localhost:8080/api/files', formData);
+        return this.http.post<{ imageUrl: string }>(`${API_BASE_URL}/files`, formData);
     }
     // PUT /api/issues/{id}
     updateIssue(id: number, issue: Issue): Observable<Issue> {

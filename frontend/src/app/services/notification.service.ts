@@ -4,11 +4,13 @@ import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Notification } from '../models/notification.model';
 
+import { API_BASE_URL } from '../app.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class NotificationService {
-    private apiUrl = 'http://localhost:8080/api/notifications';
+    private apiUrl = `${API_BASE_URL}/notifications`;
 
     // Oggetto per emettere eventi quando le notifiche vengono lette/aggiornate
     private notificationsUpdatedSource = new Subject<void>();
