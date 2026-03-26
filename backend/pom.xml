@@ -19,6 +19,8 @@
 	<properties>
 		<java.version>25</java.version>
 		<lombok.version>1.18.40</lombok.version>
+		<sonar.organization>savifank03</sonar.organization>
+		<sonar.projectKey>SaViFaNk03_BugBoard-26</sonar.projectKey>
 	</properties>
 
 	<dependencies>
