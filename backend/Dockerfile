@@ -23,5 +23,5 @@ COPY --from=builder /app/target/*.jar app.jar
 VOLUME /app/uploads
 # Informa Docker che il container è in ascolto sulla porta 8080
 EXPOSE 8080
-# Comando da avviare quando parte il container
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Comando da avviare quando parte il container limitando la memoria per evitare crash su cloud gratuiti
+ENTRYPOINT ["java", "-Xmx256m", "-Xss512k", "-jar", "app.jar"]
